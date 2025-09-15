@@ -1,13 +1,17 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --theme: 30,30,30;
+  --lbg: 255,255,255;
+  --dbg: 17,17,17;
+  --lcolor: 0,0,0;
+  --dcolor: 255,255,255;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.light-mode{
+  --bg: var(--lbg);
+  --color: var(--lcolor);
+}
+.dark-mode{
+  --bg: var(--dbg);
+  --color: var(--dcolor);
 }
 
 html,
@@ -17,11 +21,12 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: rgba(var(--color));
+  background: rgba(var(--bg));
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  user-select: none;
 }
 
 * {
@@ -35,8 +40,10 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+.overflow-none{
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.overflow-none::-webkit-scrollbar{
+  display: none; /* Chrome, Safari, and Opera */
 }

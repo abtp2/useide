@@ -1,0 +1,72 @@
+.navbar{
+width: 100%;
+display: flex;
+align-items: center;
+padding: 1rem;
+background: rgba(var(--bg),1);
+border-bottom: 1px solid rgba(var(--color),0.1);
+}
+.navbar svg{
+width: 24px;
+height: 24px;
+}
+.navbar svg:nth-of-type(2){
+margin: 0 1rem 0 auto;
+width: 20px;
+height: 20px;
+fill: #fff;
+}
+.navbarFileName{
+display: flex;
+flex-direction: column;
+margin: 0 0 0 1rem;
+}
+.navbarFileName h1{
+font-size: 17px;
+}
+.navbarFileName p{
+font-size: 12px;
+opacity: 0.7;
+margin: 1px 0 0 0;
+}
+
+/* Nav Tabs */
+.navtabs{
+width: 100%;
+display: flex;
+align-items: center;
+background: rgba(var(--bg),1);
+overflow-x: auto;
+overflow-y: hidden;
+}
+.navtab{
+display: flex;
+align-items: center;
+gap: 5px;
+padding: 12px;
+font-size: 13px;
+border: 1px solid rgba(var(--theme));
+}
+.navtab p{
+opacity: 0.7;
+}
+.navtab img{
+opacity: 0.8;
+}
+.navtab svg{
+width: 18px;
+height: 18px;
+margin-left: 10px;
+background: rgba(var(--color),0.1);
+padding: 4px;
+border-radius: 100%;
+color: rgba(var(--color));
+}
+.activeNavtab{
+background: rgba(var(--theme));
+}
+.activeNavtab p{
+opacity: 1;
+}
+
+
