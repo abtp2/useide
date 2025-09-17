@@ -70,3 +70,115 @@ opacity: 1;
 }
 
 
+
+/* Sidebar */
+.sidebar{
+width: 100%;
+height: 100vh;
+position: fixed;
+top: 0;
+left: -100%;
+transition: all 0.2s;
+z-index: 99;
+display: flex;
+align-items: center;
+}
+.sidebarOpen{
+left: 0 !important;
+}
+@media(min-width:768px){
+  .sidebar{
+    position: static;
+  }
+}
+
+
+/* File Manager */
+.fileManager{
+width: 80%;
+height: 100%;
+background: rgba(var(--bg));
+}
+
+
+
+
+/* File Tree Container */
+.fileTreeContainer {
+width: 100%;
+overflow: auto;
+position: relative;
+color: rgba(var(--color));
+font-size: 15px;
+}
+.fileTreeContent {
+padding: 8px 0;
+}
+.treeNode {
+display: flex;
+align-items: center;
+padding: 4px 12px;
+margin: 5px 0;
+user-select: none;
+}
+.treeNode:hover{
+background: rgba(var(--color),0.08);
+}
+.treeNode.selected {
+background-color: red;
+}
+.folderNode {
+font-weight: 500;
+}
+.fileNode {
+font-weight: normal;
+}
+.nodeContent {
+display: flex;
+align-items: center;
+gap: 5px;
+}
+.nodeName {
+font-size: 14px;
+user-select: none;
+}
+.folderName {
+color: rgba(var(--color),0.7);
+}
+.fileName {
+color: rgba(var(--color),0.7);
+}
+.chevronIcon {
+color: rgba(var(--color),0.7);
+flex-shrink: 0;
+}
+.folderIcon {
+color: ;
+flex-shrink: 0;
+}
+.fileIcon {
+width: 16px;
+height: 16px;
+flex-shrink: 0;
+object-fit: contain;
+}
+.statusBar {
+background-color: #2563eb;
+color: white;
+padding: 8px 12px;
+font-size: 12px;
+border-top: 1px solid #1d4ed8;
+}
+
+
+/* Focus States for Accessibility */
+.treeNode:focus {
+outline: 2px solid #3b82f6;
+outline-offset: -2px;
+}
+.chevronIcon {
+transition: transform 0.2s ease;
+}
+.treeNode:hover .chevronIcon {
+transform: scale(1.1);
+}
