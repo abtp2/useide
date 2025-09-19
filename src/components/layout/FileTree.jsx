@@ -4,11 +4,54 @@ import styles from "./layout.module.css";
 import { 
   LuChevronRight, 
   LuChevronDown, 
-  LuFile, 
+  LuFile,
   LuFolder, 
   LuFolderOpen, 
-  LuEllipsisVertical 
+  LuPencil,
+  LuTrash
 } from 'react-icons/lu';
+
+// File icon mapping based on extension - using image sources
+const getFileIcon = (extension) => {
+  const iconMap = {
+    'jsx': '/react-original.svg',
+    'js': '/javascript-original.svg',
+    'ts': '/typescript-original.svg',
+    'tsx': '/react-original.svg',
+    'html': '/html5-original.svg',
+    'css': '/css3-original.svg',
+    'scss': '/sass-original.svg',
+    'json': '/json-original.svg',
+    'md': '/markdown-original.svg',
+    'txt': '/file-text.svg',
+    'py': '/python-original.svg',
+    'java': '/java-original.svg',
+    'cpp': '/cplusplus-original.svg',
+    'c': '/c-original.svg',
+    'php': '/php-original.svg',
+    'rb': '/ruby-original.svg',
+    'go': '/go-original.svg',
+    'rs': '/rust-original.svg',
+    'vue': '/vue-original.svg',
+    'svg': '/file-image.svg',
+    'jpg': '/file-image.svg',
+    'jpeg': '/file-image.svg',
+    'gif': '/file-image.svg',
+    'ico': '/file-image.svg',
+    'zip': '/file-archive.svg',
+    'rar': '/file-archive.svg',
+    'tar': '/file-archive.svg',
+    'gz': '/file-archive.svg',
+    'gitignore': '/git-original.svg',
+    'env': '/file-cog.svg',
+    'config': '/file-cog.svg',
+    'yml': '/yaml-original.svg',
+    'yaml': '/yaml-original.svg',
+    'xml': '/xml-original.svg'
+  };
+  
+  return iconMap[extension?.toLowerCase()] || '/file.svg';
+};
 
 // Move FileTreeNode outside to prevent re-creation
 const FileTreeNode = React.memo(({ 
@@ -20,38 +63,79 @@ const FileTreeNode = React.memo(({
   onToggleFolder, 
   onSelectFile,
   onAddFile,
-  onAddFolder
+  onAddFolder,
+  onEditNode,
+  onDeleteNode,
+  editingNode,
+  setEditingNode
 }) => {
   const currentPath = path ? `${path}/${node.name}` : node.name;
   const isExpanded = expandedFolders.has(currentPath);
   const isSelected = selectedFile === currentPath;
-  const [showMenu, setShowMenu] = useState(false);
+  const isEditing = editingNode === currentPath;
+  const [isHovered, setIsHovered] = useState(false);
+  const [editValue, setEditValue] = useState(node.name);
 
   const handleToggleFolder = useCallback(() => {
-    onToggleFolder(currentPath);
-  }, [currentPath, onToggleFolder]);
+    if (!isEditing) {
+      onToggleFolder(currentPath);
+    }
+  }, [currentPath, onToggleFolder, isEditing]);
 
   const handleSelectFile = useCallback(() => {
-    onSelectFile(currentPath);
-  }, [currentPath, onSelectFile]);
+    if (!isEditing) {
+      onSelectFile(currentPath);
+    }
+  }, [currentPath, onSelectFile, isEditing]);
 
   const handleAddFile = useCallback((e) => {
     e.stopPropagation();
     const fileName = prompt('Enter file name (with extension):');
-    if (fileName) {
-      onAddFile(currentPath, fileName);
+    if (fileName?.trim()) {
+      onAddFile(currentPath, fileName.trim());
     }
-    setShowMenu(false);
   }, [currentPath, onAddFile]);
 
   const handleAddFolder = useCallback((e) => {
     e.stopPropagation();
     const folderName = prompt('Enter folder name:');
-    if (folderName) {
-      onAddFolder(currentPath, folderName);
+    if (folderName?.trim()) {
+      onAddFolder(currentPath, folderName.trim());
     }
-    setShowMenu(false);
   }, [currentPath, onAddFolder]);
+
+  const handleEdit = useCallback((e) => {
+    e.stopPropagation();
+    setEditValue(node.name);
+    setEditingNode(currentPath);
+  }, [currentPath, node.name, setEditingNode]);
+
+  const handleDelete = useCallback((e) => {
+    e.stopPropagation();
+    const confirmDelete = confirm(`Are you sure you want to delete "${node.name}"?`);
+    if (confirmDelete) {
+      onDeleteNode(currentPath);
+    }
+  }, [currentPath, node.name, onDeleteNode]);
+
+  const handleEditSubmit = useCallback((e) => {
+    if (e.key === 'Enter') {
+      if (editValue.trim() && editValue.trim() !== node.name) {
+        onEditNode(currentPath, editValue.trim());
+      }
+      setEditingNode(null);
+    } else if (e.key === 'Escape') {
+      setEditingNode(null);
+      setEditValue(node.name);
+    }
+  }, [editValue, node.name, currentPath, onEditNode, setEditingNode]);
+
+  const handleEditBlur = useCallback(() => {
+    if (editValue.trim() && editValue.trim() !== node.name) {
+      onEditNode(currentPath, editValue.trim());
+    }
+    setEditingNode(null);
+  }, [editValue, node.name, currentPath, onEditNode, setEditingNode]);
 
   if (node.type === 'folder') {
     return (
@@ -60,8 +144,8 @@ const FileTreeNode = React.memo(({
           className={`${styles.treeNode} ${styles.folderNode} ${isSelected ? styles.selected : ''}`}
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
           onClick={handleToggleFolder}
-          onMouseEnter={() => setShowMenu(true)}
-          onMouseLeave={() => setShowMenu(false)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
           <div className={styles.nodeContent}>
             {isExpanded ? (
@@ -74,11 +158,24 @@ const FileTreeNode = React.memo(({
             ) : (
               <LuFolder size={16} className={styles.folderIcon}/>
             )}
-            <span className={`${styles.nodeName} ${styles.folderName}`}>
-              {node.name}
-            </span>
-            {showMenu && (
-              <div className={styles.folderActions}>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={handleEditSubmit}
+                onBlur={handleEditBlur}
+                className={styles.editInput}
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <span className={`${styles.nodeName} ${styles.folderName}`}>
+                {node.name}
+              </span>
+            )}
+            {isHovered && !isEditing && (
+              <div className={styles.nodeActions}>
                 <button 
                   onClick={handleAddFile}
                   className={styles.actionBtn}
@@ -93,6 +190,22 @@ const FileTreeNode = React.memo(({
                 >
                   <LuFolder size={12} />
                 </button>
+                <button 
+                  onClick={handleEdit}
+                  className={styles.actionBtn}
+                  title="Edit name"
+                >
+                  <LuPencil size={12} />
+                </button>
+                {currentPath !== 'my-project' && (
+                  <button 
+                    onClick={handleDelete}
+                    className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                    title="Delete"
+                  >
+                    <LuTrash size={12} />
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -111,6 +224,10 @@ const FileTreeNode = React.memo(({
                 onSelectFile={onSelectFile}
                 onAddFile={onAddFile}
                 onAddFolder={onAddFolder}
+                onEditNode={onEditNode}
+                onDeleteNode={onDeleteNode}
+                editingNode={editingNode}
+                setEditingNode={setEditingNode}
               />
             ))}
           </div>
@@ -124,12 +241,51 @@ const FileTreeNode = React.memo(({
       className={`${styles.treeNode} ${styles.fileNode} ${isSelected ? styles.selected : ''}`}
       style={{ paddingLeft: `${depth * 16 + 24}px` }}
       onClick={handleSelectFile}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div className={styles.nodeContent}>
-        <LuFile size={16} className={styles.fileIcon} />
-        <span className={`${styles.nodeName} ${styles.fileName}`}>
-          {node.name}
-        </span>
+        <img 
+          src={getFileIcon(node.extension)} 
+          alt={`${node.extension} file`}
+          className={styles.fileIcon}
+          width={16}
+          height={16}
+        />
+        {isEditing ? (
+          <input
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleEditSubmit}
+            onBlur={handleEditBlur}
+            className={styles.editInput}
+            autoFocus
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <span className={`${styles.nodeName} ${styles.fileName}`}>
+            {node.name}
+          </span>
+        )}
+        {isHovered && !isEditing && (
+          <div className={styles.nodeActions}>
+            <button 
+              onClick={handleEdit}
+              className={styles.actionBtn}
+              title="Edit name"
+            >
+              <LuPencil size={12} />
+            </button>
+            <button 
+              onClick={handleDelete}
+              className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+              title="Delete"
+            >
+              <LuTrash size={12} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -190,9 +346,9 @@ const FileTree = () => {
     ]
   });
 
-  const [expandedFolders, setExpandedFolders] = useState(new Set(['my-project', 'src']));
+  const [expandedFolders, setExpandedFolders] = useState(new Set(['my-project', 'my-project/src']));
   const [selectedFile, setSelectedFile] = useState(null);
-  const [showMainMenu, setShowMainMenu] = useState(false);
+  const [editingNode, setEditingNode] = useState(null);
 
   const toggleFolder = useCallback((path) => {
     setExpandedFolders(prev => {
@@ -214,16 +370,17 @@ const FileTree = () => {
   const updateNodeInTree = useCallback((tree, targetPath, updater) => {
     const pathParts = targetPath.split('/');
     
-    const traverse = (node, currentParts) => {
-      if (currentParts.length === 1) {
+    const traverse = (node, currentParts, parentPath = '') => {
+      const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
+      
+      if (currentPath === targetPath) {
         return updater(node);
       }
       
-      const [currentPart, ...remainingParts] = currentParts;
-      if (node.name === currentPart && node.children) {
+      if (node.children && targetPath.startsWith(currentPath)) {
         return {
           ...node,
-          children: node.children.map(child => traverse(child, remainingParts))
+          children: node.children.map(child => traverse(child, currentParts, currentPath))
         };
       }
       
@@ -244,7 +401,12 @@ const FileTree = () => {
     setFileStructure(prev => 
       updateNodeInTree(prev, folderPath, (node) => ({
         ...node,
-        children: [...(node.children || []), newFile]
+        children: [...(node.children || []), newFile].sort((a, b) => {
+          if (a.type !== b.type) {
+            return a.type === 'folder' ? -1 : 1;
+          }
+          return a.name.localeCompare(b.name);
+        })
       }))
     );
   }, [updateNodeInTree]);
@@ -259,55 +421,85 @@ const FileTree = () => {
     setFileStructure(prev => 
       updateNodeInTree(prev, parentPath, (node) => ({
         ...node,
-        children: [...(node.children || []), newFolder]
+        children: [...(node.children || []), newFolder].sort((a, b) => {
+          if (a.type !== b.type) {
+            return a.type === 'folder' ? -1 : 1;
+          }
+          return a.name.localeCompare(b.name);
+        })
       }))
     );
   }, [updateNodeInTree]);
 
-  const handleMainAddFile = useCallback(() => {
-    const fileName = prompt('Enter file name (with extension):');
-    if (fileName) {
-      addFile('my-project', fileName);
-    }
-    setShowMainMenu(false);
-  }, [addFile]);
+  const editNode = useCallback((nodePath, newName) => {
+    setFileStructure(prev => 
+      updateNodeInTree(prev, nodePath, (node) => ({
+        ...node,
+        name: newName,
+        extension: node.type === 'file' ? newName.split('.').pop() || '' : undefined
+      }))
+    );
 
-  const handleMainAddFolder = useCallback(() => {
-    const folderName = prompt('Enter folder name:');
-    if (folderName) {
-      addFolder('my-project', folderName);
+    // Update selected file path if it was the edited node
+    if (selectedFile === nodePath) {
+      const pathParts = nodePath.split('/');
+      pathParts[pathParts.length - 1] = newName;
+      setSelectedFile(pathParts.join('/'));
     }
-    setShowMainMenu(false);
-  }, [addFolder]);
+
+    // Update expanded folders if it was a folder that was renamed
+    setExpandedFolders(prev => {
+      const newExpanded = new Set();
+      prev.forEach(path => {
+        if (path === nodePath) {
+          const pathParts = path.split('/');
+          pathParts[pathParts.length - 1] = newName;
+          newExpanded.add(pathParts.join('/'));
+        } else if (path.startsWith(nodePath + '/')) {
+          const pathParts = nodePath.split('/');
+          pathParts[pathParts.length - 1] = newName;
+          const newBasePath = pathParts.join('/');
+          const remainingPath = path.substring(nodePath.length);
+          newExpanded.add(newBasePath + remainingPath);
+        } else {
+          newExpanded.add(path);
+        }
+      });
+      return newExpanded;
+    });
+  }, [updateNodeInTree, selectedFile]);
+
+  const deleteNode = useCallback((nodePath) => {
+    const pathParts = nodePath.split('/');
+    const parentPath = pathParts.slice(0, -1).join('/');
+    const nodeToDelete = pathParts[pathParts.length - 1];
+
+    setFileStructure(prev => 
+      updateNodeInTree(prev, parentPath, (node) => ({
+        ...node,
+        children: (node.children || []).filter(child => child.name !== nodeToDelete)
+      }))
+    );
+
+    // Clear selection if deleted node was selected
+    if (selectedFile === nodePath || selectedFile?.startsWith(nodePath + '/')) {
+      setSelectedFile(null);
+    }
+
+    // Remove from expanded folders
+    setExpandedFolders(prev => {
+      const newExpanded = new Set();
+      prev.forEach(path => {
+        if (path !== nodePath && !path.startsWith(nodePath + '/')) {
+          newExpanded.add(path);
+        }
+      });
+      return newExpanded;
+    });
+  }, [updateNodeInTree, selectedFile]);
 
   return (
     <div className={styles.fileTreeContainer}>
-      <div className={styles.fileTreeHeader}>
-        <div className={styles.projectTitle}>
-          <LuFolder size={16} />
-          <span>{fileStructure.name}</span>
-        </div>
-        <div 
-          className={styles.mainMenu}
-          onMouseEnter={() => setShowMainMenu(true)}
-          onMouseLeave={() => setShowMainMenu(false)}
-        >
-          <LuEllipsisVertical size={16} />
-          {showMainMenu && (
-            <div className={styles.mainMenuDropdown}>
-              <button onClick={handleMainAddFile} className={styles.menuItem}>
-                <LuFile size={14} />
-                Add File
-              </button>
-              <button onClick={handleMainAddFolder} className={styles.menuItem}>
-                <LuFolder size={14} />
-                Add Folder
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-      
       <div className={styles.fileTreeContent}>
         <FileTreeNode 
           node={fileStructure}
@@ -317,6 +509,10 @@ const FileTree = () => {
           onSelectFile={selectFile}
           onAddFile={addFile}
           onAddFolder={addFolder}
+          onEditNode={editNode}
+          onDeleteNode={deleteNode}
+          editingNode={editingNode}
+          setEditingNode={setEditingNode}
         />
       </div>
       
