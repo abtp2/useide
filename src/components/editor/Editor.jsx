@@ -87,8 +87,8 @@ const CodeEditor = ({ language = 'javascript', value = '', onChange }) => {
           }),
           EditorView.theme({
             '&': {
-              height: '100vh',
-              fontSize: '14px'
+              height: '100%',
+              fontSize: '15px'
             },
             '.cm-editor': {
               height: '100%'
