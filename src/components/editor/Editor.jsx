@@ -13,7 +13,8 @@ import { php } from '@codemirror/lang-php';
 import { rust } from '@codemirror/lang-rust';
 import { sql } from '@codemirror/lang-sql';
 import { markdown } from '@codemirror/lang-markdown';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { githubDark } from '@fsegurai/codemirror-theme-github-dark';
+import { abcdef } from '@fsegurai/codemirror-theme-abcdef';
 import { autocompletion, completionKeymap, closeBrackets } from '@codemirror/autocomplete';
 import { keymap } from '@codemirror/view';
 import { indentWithTab } from '@codemirror/commands';
@@ -68,7 +69,7 @@ const CodeEditor = ({ language = 'javascript', value = '', onChange }) => {
         extensions: [
           basicSetup,
           getLanguageExtension(language),
-          oneDark,
+          abcdef,
           autocompletion({
             activateOnTyping: true,
             selectOnOpen: true,
