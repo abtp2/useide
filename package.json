@@ -26,6 +26,8 @@
     "@codemirror/view": "^6.38.2",
     "@fsegurai/codemirror-theme-abcdef": "^6.2.2",
     "@fsegurai/codemirror-theme-github-dark": "^6.2.2",
+    "@fsegurai/codemirror-theme-solarized-dark": "^6.2.2",
+    "@fsegurai/codemirror-theme-solarized-light": "^6.2.2",
     "codemirror": "^6.0.2",
     "next": "15.5.3",
     "react": "19.1.0",

@@ -15,9 +15,12 @@ import { sql } from '@codemirror/lang-sql';
 import { markdown } from '@codemirror/lang-markdown';
 import { githubDark } from '@fsegurai/codemirror-theme-github-dark';
 import { abcdef } from '@fsegurai/codemirror-theme-abcdef';
+import { solarizedDark } from '@fsegurai/codemirror-theme-solarized-dark';
+import { solarizedLight } from '@fsegurai/codemirror-theme-solarized-light';
 import { autocompletion, completionKeymap, closeBrackets } from '@codemirror/autocomplete';
 import { keymap } from '@codemirror/view';
 import { indentWithTab } from '@codemirror/commands';
+import styles from "./editor.module.css";
 
 const CodeEditor = ({ language = 'javascript', value = '', onChange }) => {
   const editorRef = useRef(null);
@@ -69,7 +72,7 @@ const CodeEditor = ({ language = 'javascript', value = '', onChange }) => {
         extensions: [
           basicSetup,
           getLanguageExtension(language),
-          abcdef,
+          githubDark,
           autocompletion({
             activateOnTyping: true,
             selectOnOpen: true,
@@ -88,8 +91,8 @@ const CodeEditor = ({ language = 'javascript', value = '', onChange }) => {
           }),
           EditorView.theme({
             '&': {
-              height: '100%',
-              fontSize: '15px'
+              height: '100dvh',
+              fontSize: '12px'
             },
             '.cm-editor': {
               height: '100%'
@@ -122,7 +125,7 @@ const CodeEditor = ({ language = 'javascript', value = '', onChange }) => {
     }
   }, [value]);
 
-  return <div ref={editorRef} style={{ height: '100%' }} />;
+  return <div className={styles.editor} ref={editorRef}/>;
 };
 
 export default CodeEditor;
