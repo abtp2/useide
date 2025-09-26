@@ -1,13 +1,18 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import url("https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css");
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+
+:root {
+  --dbg: 18,18,18;
+  --dcolor: 255,255,255;
+
+  --lbg: 255,255,255;
+  --lcolor: 18,18,18;
+
+  --gray1: 38,38,38;
+  --gray2: 54,54,54;
+  --gray3: 100,100,100;
+  --gray4: 125,125,125;
+  --gray5: 150,150,150;
 }
 
 html,
@@ -33,10 +38,4 @@ body {
 a {
   color: inherit;
   text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
 }
